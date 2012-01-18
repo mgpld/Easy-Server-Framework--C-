@@ -1,0 +1,156 @@
+prefix=/usr/local
+LIBDIR=${prefix}/lib
+INCLUDEDIR=${prefix}/include
+MAN3DIR=${prefix}/man/man3
+LIBNAME=diet_libowfat.a
+
+all: byte.a fmt.a scan.a str.a uint.a open.a stralloc.a unix.a socket.a buffer.a mmap.a tai.a cdb.a case.a mult.a array.a ${LIBNAME} 
+
+VPATH=str:byte:fmt:scan:uint:open:stralloc:unix:socket:buffer:mmap:textcode:tai:timeout:sig:dns:case:cdb:alloc:constmap:mult:array
+
+# comment out the following line if you don't want to build with the
+# diet libc (http://www.fefe.de/dietlibc/).
+DIET=diet -Os
+CC=gcc
+CFLAGS=-I. -pipe -Wall -O2 -fomit-frame-pointer
+#CFLAGS=-pipe -Os -march=pentiumpro -mcpu=pentiumpro -fomit-frame-pointer -fschedule-insns2 -Wall
+
+BYTE_diet_objs=$(patsubst byte/%.c,diet_objs/%.o,$(wildcard byte/*.c))
+FMT_diet_objs=$(patsubst fmt/%.c,diet_objs/%.o,$(wildcard fmt/*.c))
+SCAN_diet_objs=$(patsubst scan/%.c,diet_objs/%.o,$(wildcard scan/*.c))
+STR_diet_objs=$(patsubst str/%.c,diet_objs/%.o,$(wildcard str/*.c))
+UINT_diet_objs=$(patsubst uint/%.c,diet_objs/%.o,$(wildcard uint/*.c))
+OPEN_diet_objs=$(patsubst open/%.c,diet_objs/%.o,$(wildcard open/*.c))
+STRA_diet_objs=$(patsubst stralloc/%.c,diet_objs/%.o,$(wildcard stralloc/*.c))
+UNIX_diet_objs=$(patsubst unix/%.c,diet_objs/%.o,$(wildcard unix/*.c))
+SOCKET_diet_objs=$(patsubst socket/%.c,diet_objs/%.o,$(wildcard socket/*.c))
+BUFFER_diet_objs=$(patsubst buffer/%.c,diet_objs/%.o,$(wildcard buffer/*.c))
+MMAP_diet_objs=$(patsubst mmap/%.c,diet_objs/%.o,$(wildcard mmap/*.c))
+TEXTCODE_diet_objs=$(patsubst textcode/%.c,diet_objs/%.o,$(wildcard textcode/*.c))
+DNS_diet_objs=$(patsubst dns/%.c,diet_objs/%.o,$(wildcard dns/*.c))
+CASE_diet_objs=$(patsubst case/%.c,diet_objs/%.o,$(wildcard case/*.c))
+TAI_diet_objs=$(patsubst tai/%.c,diet_objs/%.o,$(wildcard tai/*.c))
+TIMEOUT_diet_objs=$(patsubst timeout/%.c,diet_objs/%.o,$(wildcard timeout/*.c))
+SIG_diet_objs=$(patsubst sig/%.c,diet_objs/%.o,$(wildcard sig/*.c))
+CDB_diet_objs=$(patsubst cdb/%.c,diet_objs/%.o,$(wildcard cdb/*.c))
+ALLOC_diet_objs=$(patsubst alloc/%.c,diet_objs/%.o,$(wildcard alloc/*.c))
+CONSTMAP_diet_objs=$(patsubst constmap/%.c,diet_objs/%.o,$(wildcard constmap/*.c))
+MULT_diet_objs=$(patsubst mult/%.c,diet_objs/%.o,$(wildcard mult/*.c))
+ARRAY_diet_objs=$(patsubst array/%.c,diet_objs/%.o,$(wildcard array/*.c))
+
+$(BYTE_diet_objs): byte.h
+$(FMT_diet_objs): fmt.h
+$(SCAN_diet_objs): scan.h
+$(STR_diet_objs): str.h
+$(UINT_diet_objs): uint16.h uint32.h
+$(STRA_diet_objs): stralloc.h
+$(SOCKET_diet_objs): socket.h
+$(BUFFER_diet_objs): buffer.h
+$(MMAP_diet_objs): mmap.h
+$(TEXTCODE_diet_objs): textcode.h
+$(DNS_diet_objs): dns.h
+$(CASE_diet_objs): case.h
+$(TAI_diet_objs): tai.h taia.h
+$(TIMEOUT_diet_objs): timeout.h
+$(SIG_diet_objs): sig.h
+$(CDB_diet_objs): cdb.h
+$(ALLOC_diet_objs): alloc.h
+$(CONSTMAP_diet_objs): constmap.h
+$(MULT_diet_objs): safemult.h
+$(ARRAY_diet_objs): array.h
+
+byte.a: $(BYTE_diet_objs)
+fmt.a: $(FMT_diet_objs)
+scan.a: $(SCAN_diet_objs)
+str.a: $(STR_diet_objs)
+uint.a: $(UINT_diet_objs)
+open.a: $(OPEN_diet_objs)
+stralloc.a: $(STRA_diet_objs)
+unix.a: $(UNIX_diet_objs)
+socket.a: $(SOCKET_diet_objs)
+buffer.a: $(BUFFER_diet_objs)
+mmap.a: $(MMAP_diet_objs)
+textcode.a: $(TEXTCODE_diet_objs)
+dns.a: $(DNS_diet_objs)
+case.a: $(CASE_diet_objs)
+tai.a: $(TAI_diet_objs)
+timeout.a: $(TIMEOUT_diet_objs)
+sig.a: $(SIG_diet_objs)
+cdb.a: $(CDB_diet_objs)
+alloc.a: $(ALLOC_diet_objs)
+mult.a: $(MULT_diet_objs)
+array.a: $(ARRAY_diet_objs)
+
+$(LIBNAME): $(BYTE_diet_objs) $(FMT_diet_objs) $(SCAN_diet_objs) $(STR_diet_objs) \
+$(UINT_diet_objs) $(OPEN_diet_objs) $(STRA_diet_objs) $(UNIX_diet_objs) $(SOCKET_diet_objs) \
+$(BUFFER_diet_objs) $(MMAP_diet_objs) $(TEXTCODE_diet_objs) $(TAI_diet_objs) \
+$(TIMEOUT_diet_objs) $(SIG_diet_objs) $(DNS_diet_objs) $(CASE_diet_objs) $(CDB_diet_objs) \
+$(ALLOC_diet_objs) $(CONSTMAP_diet_objs) $(MULT_diet_objs) $(ARRAY_diet_objs)
+
+diet_objs/%.o: %.c
+	$(DIET) $(CC) -c $< -o $@ $(CFLAGS)
+
+%.a:
+	ar cr $@ $^
+	-ranlib $@
+
+t: t.o $(LIBNAME)
+	$(DIET) $(CC) -g -o $@ $^
+
+.PHONY: clean tar install rename
+clean:
+	rm -f diet_objs/*.o *.a *.da *.bbg *.bb core t haveip6.h haven2i.h haveinline.h
+
+INCLUDES=buffer.h byte.h fmt.h ip4.h ip6.h mmap.h scan.h socket.h str.h stralloc.h uint16.h uint32.h uint64.h open.h textcode.h sig.h tai.h taia.h timeout.h wait.h env.h 
+
+install: $(LIBNAME)
+	install -d $(INCLUDEDIR) $(MAN3DIR) $(LIBDIR)
+	install -m 644 $(INCLUDES) $(INCLUDEDIR)
+	install -m 644 $(wildcard */*.3) $(MAN3DIR)
+	install -m 644 $(LIBNAME) $(LIBDIR)
+
+uninstall:
+	rm -f $(patsubst %.h,$(INCLUDEDIR)/%.h,$(INCLUDES))
+	rm -f $(patsubst %.3,$(MAN3DIR)/%.3,$(notdir $(wildcard */*.3)))
+	rm -f $(LIBDIR)/$(LIBNAME)
+
+VERSION=libowfat-$(shell head -1 CHANGES|sed 's/://')
+CURNAME=$(notdir $(shell pwd))
+
+tar: clean rename
+	cd ..; tar cvvf $(VERSION).tar.bz2 $(VERSION) --use=bzip2 --exclude CVS
+
+rename:
+	if test $(CURNAME) != $(VERSION); then cd .. && mv $(CURNAME) $(VERSION); fi
+
+haveip6.h:
+	-rm -f $@
+	if $(DIET) $(CC) -c tryip6.c >/dev/null 2>&1; then echo "#define LIBC_HAS_IP6"; fi > $@
+	-rm -f tryip6.o
+
+haven2i.h:
+	-rm -f $@
+	if $(DIET) $(CC) -o t tryn2i.c >/dev/null 2>&1; then echo "#define HAVE_N2I"; fi > $@
+	-rm -f t
+
+# havesl.h:
+# 	-rm -f $@
+# 	if ! $(DIET) $(CC) -o t trysl.c >/dev/null 2>&1; then echo "typedef int socklen_t;"; fi > $@
+# 	-rm -f t
+
+haveinline.h:
+	-rm -f $@
+	if ! $(DIET) $(CC) -c tryinline.c >/dev/null 2>&1; then echo "#define inline"; fi > $@
+	-rm -f tryip6.o
+
+socket_accept6.o socket_connect6.o socket_local6.o socket_mchopcount6.o \
+socket_mcjoin6.o socket_mcleave6.o socket_mcloop6.o socket_recv6.o \
+socket_remote6.o socket_send6.o socket_tcp6.o socket_udp6.o: haveip6.h
+
+socket_getifidx.o socket_getifname.o: haven2i.h
+
+# socket_accept4.o socket_accept6.o socket_connected.o socket_local4.o \
+# socket_local6.o socket_recv4.o socket_recv6.o socket_remote4.o \
+# socket_remote6.o: havesl.h
+
+fmt_xlong.o scan_xlong.o fmt_ip6_flat.o $(TEXTCODE_diet_objs): haveinline.h
