@@ -2,3 +2,6 @@ C Library mostly ripped from Djb and fefe (libowfat).
 
 Some code was tweaked to meet my needs.
 
+fefe: http://www.fefe.de/libowfat/
+djb: http://cr.yp.to/ucspi-tcp.html
+djb: http://cr.yp.to/daemontools.html
